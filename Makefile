@@ -5,7 +5,6 @@ tools:
 
 build:
 	@command mkdir -p out
-	
 test: build
 	@echo "Comenzando pruebas ..."
 	@python3 -m http.server 8080 > /dev/null 2>&1 &
@@ -15,7 +14,11 @@ test: build
 	@command fuser -k 8080/tcp || true
 clean:
 	@rm -rf out/
-
+pack:
+	@echo "Empaquetando en dist/"
+	@mkdir -p dist
+	@tar -czf dist/automatizador-despliegue.tar.gz README.md Makefile src docs tests || exit 1
+	@echo "Paquete creado: dist/automatizador-despliegue.tar.gz"
 help:
 	@echo "Comandos disponibles:"
 	@echo "  make build   # Construye artefactos /out y /dist"
