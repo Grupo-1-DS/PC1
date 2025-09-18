@@ -15,6 +15,8 @@ Durante los primeros días, el equipo se enfocó en dejar lista la estructura b�
 
 - `make tools`: Llama a `check_tools.sh` para revisar que estén instaladas las herramientas clave (curl, dig, ss, nc). Si falta alguna, avisa y no deja seguir, evitando errores inesperados después.
 
+- `make pack`: Empaqueta el proyecto entero en un archivo comprimido ubicado en `dist` asegurando que el programa sea reproducible
+
 ### Decisiones y aprendizajes
 
 - Se priorizó automatizar todo lo posible desde el inicio, para que nadie tenga que hacer pasos manuales innecesarios.
