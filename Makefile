@@ -1,5 +1,7 @@
 .PHONY: build test clean help tools
 
+run:
+	@bash src/deploy.sh
 tools:
 	@bash src/check_tools.sh
 
