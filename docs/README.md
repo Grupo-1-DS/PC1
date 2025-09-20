@@ -3,6 +3,7 @@
 
 Automatizador para despliegues validados con HTTPS/TLS, siguiendo principios DevOps y 12-Factor App.
 
+[Videos de los Sprints](https://drive.google.com/drive/folders/1sBFhOYXteBm7EsB3Ir6Fi5B56fCN-1bH?usp=sharing)
 ## Características
 
 - **Validación automática** de configuración (grep/sed/cut)
