@@ -224,8 +224,11 @@ for test_file in tests/*.bats; do
         log_deploy "El test $test_file falló :(. Deteniendo la aplicación Flask..." "warning"
         kill $FLASK_PID
         sudo sed -i "/$IP $DOMINIO/d" /etc/hosts
+        exit 1  
     fi
 done
+
+log_deploy "Todos los tests ejecutados exitosamente" "info"
 
 
 # Esperar al usuario
