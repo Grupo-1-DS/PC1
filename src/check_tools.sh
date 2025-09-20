@@ -4,7 +4,7 @@
 set -euo pipefail
 
 
-for cmd in curl dig ss nc bats; do
+for cmd in curl dig ss nc bats dos2unix; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "[INFO] Instalando $cmd..."
     sudo apt-get update

@@ -3,12 +3,42 @@
 
 # Carga las variables de entorno desde .env
 if [ -f .env ]; then
+    dos2unix .env > /dev/null 2>&1
     source .env
 else
     echo "Archivo .env no encontrado."
     exit 1
 fi
 
+# Crea y activa el entorno virtual (si no existe)
+if [ ! -d "venv" ]; then
+    echo "Creando entorno virtual..."
+    python3 -m venv venv
+    if [ $? -eq 0 ]; then
+        echo "Entorno virtual creado exitosamente."
+    else
+        echo "Error: No se pudo crear el entorno virtual."
+        exit 1
+    fi
+fi
+
+echo "Activando entorno virtual..."
+source venv/bin/activate
+if [ $? -eq 0 ]; then
+    echo "Entorno virtual activado."
+else
+    echo "Error: No se pudo activar el entorno virtual."
+    exit 1
+fi
+
+echo "Instalando dependencias..."
+pip install -r miniapp_flask/requirements.txt > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Dependencias instaladas exitosamente."
+else
+    echo "Error: No se pudieron instalar las dependencias."
+    exit 1
+fi
 
 # Muestra la versión del despliegue
 echo "DESPLIEGUE $RELEASE"
@@ -23,7 +53,7 @@ if [ ! -f "$CERT_KEY" ] || [ ! -f "$CERT_CRT" ]; then
     mkdir -p "$CERT_DIR"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout "$CERT_KEY" -out "$CERT_CRT" \
-        -subj "/CN=localhost"
+        -subj "/CN=localhost" > /dev/null 2>&1
 fi
 
 
@@ -31,7 +61,7 @@ fi
 # Arranca la miniapp Flask en segundo plano y guarda el PID
 echo "Iniciando miniapp Flask en $IP:$PORT con nohup..."
 APP_LOG="flask.log"
-nohup python miniapp_flask/app.py > "$APP_LOG" 2>&1 &
+nohup python3 miniapp_flask/app.py > "$APP_LOG" 2>&1 &
 FLASK_PID=$!
 echo $FLASK_PID > flask_app.pid
 sleep 2
