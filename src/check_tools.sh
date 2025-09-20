@@ -4,10 +4,11 @@
 set -euo pipefail
 
 
-for cmd in curl dig ss nc bats; do
+for cmd in curl dig ss nc bats nohup systemd-cat; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "[INFO] Instalando $cmd..."
     sudo apt-get update
     sudo apt-get install -y "$cmd"
   fi
 done
+echo "Todas las dependencias instaladas"
