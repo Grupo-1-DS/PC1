@@ -31,6 +31,7 @@ else
     exit 1
 fi
 
+# Instala las dependencias de la aplicación
 echo "Instalando dependencias..."
 pip install -r miniapp_flask/requirements.txt > /dev/null 2>&1
 if [ $? -eq 0 ]; then
@@ -76,9 +77,16 @@ echo "$IP $DOMINIO" | sudo tee -a /etc/hosts
 
 
 # Ejecuta los tests automáticos (HTTP, DNS, TLS)
-bats tests/
-
-
+for test_file in tests/*.bats; do
+    bats "$test_file"
+    TEST_STATUS=$?
+    if [ $TEST_STATUS -ne 0 ]; then
+        echo "El test $test_file falló :(. Deteniendo la aplicación Flask..."
+        kill $FLASK_PID
+        sudo sed -i "/$IP $DOMINIO/d" /etc/hosts
+        exit 1
+    fi
+done
 
 # Espera a que el usuario decida terminar para limpiar todo
 read -p "Presiona Enter para finalizar y detener la app..."
