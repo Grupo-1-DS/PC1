@@ -95,58 +95,6 @@ else
     exit 1
 fi
 
-# Crea y activa el entorno virtual (si no existe)
-if [ ! -d "venv" ]; then
-    echo "Creando entorno virtual..."
-    python3 -m venv venv
-    if [ $? -eq 0 ]; then
-        echo "Entorno virtual creado exitosamente."
-    else
-        echo "Error: No se pudo crear el entorno virtual."
-        exit 1
-    fi
-fi
-
-echo "Activando entorno virtual..."
-source venv/bin/activate
-if [ $? -eq 0 ]; then
-    echo "Entorno virtual activado."
-else
-    echo "Error: No se pudo activar el entorno virtual."
-    exit 1
-fi
-
-# Instala las dependencias de la aplicación
-echo "Instalando dependencias..."
-pip install -r miniapp_flask/requirements.txt > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-    echo "Dependencias instaladas exitosamente."
-else
-    echo "Error: No se pudieron instalar las dependencias."
-    exit 1
-fi
-
-# Muestra la versión del despliegue
-echo "DESPLIEGUE $RELEASE"
-
-
-# Si no existe, genera un certificado TLS autofirmado para HTTPS local
-CERT_DIR="miniapp_flask/certs"
-CERT_KEY="$CERT_DIR/server.key"
-CERT_CRT="$CERT_DIR/server.crt"
-
-# Validar que todo esté bien
-if ! validate_config; then
-    log_deploy "ERROR: Validación de configuración falló" "err"
-    exit 1
-fi
-
-# Revisar permisos
-if ! check_permissions; then
-    log_deploy "ERROR: Verificación de permisos falló" "err"
-    exit 1
-fi
-
 # Setup del venv
 if [ ! -d "venv" ]; then
     log_deploy "Creando entorno virtual..." "info"
@@ -168,12 +116,34 @@ else
     exit 1
 fi
 
+# Instalar dependencias de la aplicacion
 log_deploy "Instalando dependencias..." "info"
 pip install -r miniapp_flask/requirements.txt > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     log_deploy "Dependencias instaladas exitosamente" "info"
 else
     log_deploy "ERROR: No se pudieron instalar las dependencias" "err"
+    exit 1
+fi
+
+# Muestra la versión del despliegue
+echo "DESPLIEGUE $RELEASE"
+
+
+# Si no existe, genera un certificado TLS autofirmado para HTTPS local
+CERT_DIR="miniapp_flask/certs"
+CERT_KEY="$CERT_DIR/server.key"
+CERT_CRT="$CERT_DIR/server.crt"
+
+# Validar que todo esté bien
+if ! validate_config; then
+    log_deploy "ERROR: Validación de configuración falló" "err"
+    exit 1
+fi
+
+# Revisar permisos
+if ! check_permissions; then
+    log_deploy "ERROR: Verificación de permisos falló" "err"
     exit 1
 fi
 
