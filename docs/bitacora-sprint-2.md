@@ -50,11 +50,48 @@ La salida esperada muestra la IP 127.0.0.1 asociada al dominio:
 
 Las pruebas automáticas están implementadas con Bats en la carpeta `tests/`. Estas validan el funcionamiento del servidor HTTPS y la configuración DNS/TLS. Cuando se realizan solicitudes HTTPS con certificados autofirmados, se utiliza el flag `-k` en `curl` para permitir la conexión, ya que el certificado no está firmado por una autoridad reconocida.
 
-### Ejemplo de test
+### Pruebas HTTP
+**1. Prueba de método GET en /**
+- Envía una petición GET a la raíz / de la API.
+- Guarda la respuesta en un log.
+- Comprueba que el código de estado HTTP es 200 (OK).
 
-```sh
-bats tests/
-```
+**2. Prueba de método GET en /items**
+
+- Envía una petición GET a /items.
+- Guarda la respuesta en un log.
+- Comprueba que el código de estado HTTP es 200.
+- Verifica que la respuesta incluye:
+- Content-Type: application/json
+- Al menos un item con "id": 1.
+
+**3. Prueba de método PUT en /items/99**
+
+- Envía una petición PUT a /items/99 con un JSON de ejemplo {"nombre":"nuevo"}.
+- Guarda la respuesta en un log.
+- Verifica que el código de estado es 404.
+
+**4. Prueba de método DELETE en /items/99**
+
+- Envía una petición DELETE a /items/99.
+- Guarda la respuesta en un log.
+- Verifica que el código de estado es 404.
+
+### Pruebas DNS
+**Resolución DNS - registro A:** Verifica que el dominio resuelva a una IP IPv4 válida y guarda el resultado en /out/dns_a.txt.
+
+**Resolución DNS - registro CNAME:** Comprueba la existencia de un registro CNAME para el dominio y guarda la salida en /out/dns_cname.txt.
+
+### Pruebas TLS
+**Prueba TLS con openssl s_client:** Establece conexión TLS con el dominio usando openssl, guarda la salida en /out/tls_openssl.txt y valida que se reporte el protocolo TLS.
+
+**Prueba de encabezados HTTP sobre TLS:** Usa curl para obtener encabezados HTTPS del dominio, guarda la respuesta en /out/tls_curl_headers.txt y verifica que exista una respuesta HTTP válida.
+
+### Ejemplo de salida de test
+
+<p align="center">
+ <img src="image-3.png" alt="Validación de dominio a localhost" width="200"/>
+</p>
 
 ## Decisiones y aprendizajes
 

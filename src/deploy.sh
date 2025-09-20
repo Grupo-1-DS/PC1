@@ -87,6 +87,7 @@ log_deploy "Iniciando despliegue PC1..." "info"
 
 # Cargar el .env primero
 if [ -f .env ]; then
+    dos2unix .env > /dev/null 2>&1
     source .env
     log_deploy "Variables de entorno cargadas desde .env" "info"
 else
@@ -94,7 +95,42 @@ else
     exit 1
 fi
 
-# Rutas de los certificados
+# Crea y activa el entorno virtual (si no existe)
+if [ ! -d "venv" ]; then
+    echo "Creando entorno virtual..."
+    python3 -m venv venv
+    if [ $? -eq 0 ]; then
+        echo "Entorno virtual creado exitosamente."
+    else
+        echo "Error: No se pudo crear el entorno virtual."
+        exit 1
+    fi
+fi
+
+echo "Activando entorno virtual..."
+source venv/bin/activate
+if [ $? -eq 0 ]; then
+    echo "Entorno virtual activado."
+else
+    echo "Error: No se pudo activar el entorno virtual."
+    exit 1
+fi
+
+# Instala las dependencias de la aplicación
+echo "Instalando dependencias..."
+pip install -r miniapp_flask/requirements.txt > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Dependencias instaladas exitosamente."
+else
+    echo "Error: No se pudieron instalar las dependencias."
+    exit 1
+fi
+
+# Muestra la versión del despliegue
+echo "DESPLIEGUE $RELEASE"
+
+
+# Si no existe, genera un certificado TLS autofirmado para HTTPS local
 CERT_DIR="miniapp_flask/certs"
 CERT_KEY="$CERT_DIR/server.key"
 CERT_CRT="$CERT_DIR/server.crt"
@@ -149,6 +185,7 @@ if [ ! -f "$CERT_KEY" ] || [ ! -f "$CERT_CRT" ]; then
     mkdir -p "$CERT_DIR"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout "$CERT_KEY" -out "$CERT_CRT" \
+
         -subj "/CN=localhost"
     log_deploy "Certificado TLS generado correctamente" "info"
 fi
@@ -156,9 +193,23 @@ fi
 # Levantar Flask
 log_deploy "Iniciando miniapp Flask en $IP:$PORT con nohup..." "info"
 APP_LOG="flask.log"
-nohup python miniapp_flask/app.py > "$APP_LOG" 2>&1 &
+nohup python3 miniapp_flask/app.py > "$APP_LOG" 2>&1 &
 FLASK_PID=$!
 echo $FLASK_PID > flask_app.pid
+sleep 2
+
+
+# Ejecuta los tests automáticos (HTTP, DNS, TLS)
+for test_file in tests/*.bats; do
+    bats "$test_file"
+    TEST_STATUS=$?
+    if [ $TEST_STATUS -ne 0 ]; then
+        log_deploy "El test $test_file falló :(. Deteniendo la aplicación Flask..." "warning"
+        kill $FLASK_PID
+        sudo sed -i "/$IP $DOMINIO/d" /etc/hosts
+    fi
+done
+
 
 # Verificar que Flask arrancó bien
 if ! monitor_process "$FLASK_PID" "Flask App"; then
@@ -176,13 +227,6 @@ else
     exit 1
 fi
 
-# Correr tests
-log_deploy "Ejecutando tests automáticos..." "info"
-if bats tests/; then
-    log_deploy "Tests ejecutados exitosamente" "info"
-else
-    log_deploy "ADVERTENCIA: Algunos tests fallaron" "warning"
-fi
 
 # Esperar al usuario
 read -p "Despliegue completado. Presiona Enter para finalizar y detener la app..."

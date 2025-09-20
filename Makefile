@@ -1,15 +1,14 @@
 .PHONY: build test clean help tools pack
 
-run:
-	@bash src/deploy.sh
 tools:
 	@bash src/check_tools.sh
-
 build:
-	@command mkdir -p out
+	@mkdir -p out
+run:
+	@bash src/deploy.sh
 test: build
 	@echo "Comenzando pruebas ..."
-	@bats tests/*.bats
+	@bash bats tests/
 clean:
 	@rm -rf out/ dist/
 	@echo "Limpió el directorio"
