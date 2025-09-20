@@ -214,18 +214,34 @@ newgrp sudo
 
 ```
 PC1/
-├── README.md              # Este archivo
 ├── Makefile              # Comandos de automatización
 ├── .env                  # Configuración (crear desde .env.example)
+├── .env.example          # Plantilla de configuración
 ├── src/
 │   ├── deploy.sh         # Script principal de despliegue
 │   └── check_tools.sh    # Verificador de herramientas
-├── tests/
-│   └── http.bats         # Tests automáticos HTTP
+├── tests/                # Tests automáticos
+│   ├── http.bats         # Tests HTTP/HTTPS
+│   ├── dns.bats          # Tests DNS
+│   └── tls.bats          # Tests TLS/certificados
 ├── miniapp_flask/
-│   ├── app.py           # Aplicación Flask
-│   ├── requirements.txt # Dependencias Python
-│   └── certs/           # Certificados TLS (generados automáticamente)
-├── out/                 # Logs y artefactos (generado)
-└── docs/                # Documentación adicional
+│   ├── app.py            # Aplicación Flask
+│   ├── requirements.txt  # Dependencias Python
+│   └── certs/            # Certificados TLS (generados automáticamente)
+│       ├── server.key    # Clave privada TLS
+│       └── server.crt    # Certificado TLS
+├── out/                  # Logs y artefactos (generado automáticamente)
+│   ├── http_*.txt     # Logs de pruebas HTTP
+│   ├── dns_a.txt         # Resultados DNS tipo A
+│   ├── dns_cname.txt     # Resultados DNS tipo CNAME
+│   └── tls_*.txt         # Logs de pruebas TLS
+├── docs/                 # Documentación del proyecto
+│   ├── README.md         # Documentación técnica detallada
+│   ├── bitacora-sprint-1.md  # Bitácora del Sprint 1
+│   ├── bitacora-sprint-2.md  # Bitácora del Sprint 2
+│   ├── bitacora-sprint-3.md  # Bitácora del Sprint 3
+│   └── videos/           # Videos avances del proyecto
+├── venv/                 # Entorno virtual Python (generado)
+├── flask.log             # Log de la aplicación Flask
+└── flask_app.pid         # PID del proceso Flask
 ```
