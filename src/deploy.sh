@@ -185,7 +185,6 @@ if [ ! -f "$CERT_KEY" ] || [ ! -f "$CERT_CRT" ]; then
     mkdir -p "$CERT_DIR"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
         -keyout "$CERT_KEY" -out "$CERT_CRT" \
-
         -subj "/CN=localhost"
     log_deploy "Certificado TLS generado correctamente" "info"
 fi
@@ -196,20 +195,7 @@ APP_LOG="flask.log"
 nohup python3 miniapp_flask/app.py > "$APP_LOG" 2>&1 &
 FLASK_PID=$!
 echo $FLASK_PID > flask_app.pid
-sleep 2
-
-
-# Ejecuta los tests automáticos (HTTP, DNS, TLS)
-for test_file in tests/*.bats; do
-    bats "$test_file"
-    TEST_STATUS=$?
-    if [ $TEST_STATUS -ne 0 ]; then
-        log_deploy "El test $test_file falló :(. Deteniendo la aplicación Flask..." "warning"
-        kill $FLASK_PID
-        sudo sed -i "/$IP $DOMINIO/d" /etc/hosts
-    fi
-done
-
+sleep 3
 
 # Verificar que Flask arrancó bien
 if ! monitor_process "$FLASK_PID" "Flask App"; then
@@ -226,6 +212,20 @@ else
     kill $FLASK_PID 2>/dev/null
     exit 1
 fi
+
+
+sleep 2
+
+# Ejecuta los tests automáticos (HTTP, DNS, TLS)
+for test_file in tests/*.bats; do
+    bats "$test_file"
+    TEST_STATUS=$?
+    if [ $TEST_STATUS -ne 0 ]; then
+        log_deploy "El test $test_file falló :(. Deteniendo la aplicación Flask..." "warning"
+        kill $FLASK_PID
+        sudo sed -i "/$IP $DOMINIO/d" /etc/hosts
+    fi
+done
 
 
 # Esperar al usuario
