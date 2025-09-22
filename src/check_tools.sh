@@ -11,3 +11,4 @@ for cmd in curl dig ss nc bats dos2unix; do
     sudo apt-get install -y "$cmd"
   fi
 done
+echo "Todas las dependencias instaladas"
