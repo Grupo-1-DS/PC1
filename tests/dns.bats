@@ -11,7 +11,7 @@ setup() {
     dos2unix .env
     source .env
   else
-    echo "Archivo .env no encontrado."
+    echo "Archivo de variables de entorno (.env) no encontrado."
     exit 1
   fi
 }
@@ -23,9 +23,8 @@ teardown() {
 @test "Resolución DNS - registro A" {
   LOG_FILE="$OUT_DIR/dns_a.txt"
 
-  echo "=== Registro A de $DOMINIO ===" > "$LOG_FILE"
+  echo "=== Prueba con registro A ===" > "$LOG_FILE"
 
-  # getent sí consulta /etc/hosts
   run getent hosts "$DOMINIO"
   echo "$output" >> "$LOG_FILE"
 
@@ -36,7 +35,7 @@ teardown() {
 @test "Resolución DNS - registro CNAME" {
   LOG_FILE="$OUT_DIR/dns_cname.txt"
 
-  echo "=== Registro CNAME de $DOMINIO ===" > "$LOG_FILE"
+  echo "=== Prueba con CNAME ===" > "$LOG_FILE"
   run dig +noall +answer "$DOMINIO" CNAME
   echo "$output" >> "$LOG_FILE"
 
